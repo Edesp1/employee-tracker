@@ -1,17 +1,20 @@
 require('dotenv').config();
 const mysql = require('mysql');
-const inquirer = require('inquirer');
-const db = require("./db");
+const db = require("./db/db");
 const logo = require('asciiart-logo');
+const { createConnection } = require('mysql');
+
+(async () => {
+    const { default: inquirer } = await import('inquirer');
 
 init();
 
-const connection = mysql.createConnection({
+const connection = createConnection({
     host: 'localhost',
     port: 3306,
-    user: 'root',
+    user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
-    database: 'employees_DB',
+    database: process.env.DB_NAME,
   });
 
 function init() {
@@ -42,7 +45,6 @@ function loadPrompts() {
         "View the total utilized budget of a department", 
         "quit"]
     }];
-};
 
 inquirer.prompt(startQuestions)
 .then(response => {
@@ -92,6 +94,7 @@ inquirer.prompt(startQuestions)
 }).catch(err => {
   console.error(err);
 });
+};
 
 //view departments
 function viewDepartments() {
@@ -298,4 +301,5 @@ function updateRole() {
 function quit() {
     console.log("See you later!");
     process.exit();
-};
+}
+})();

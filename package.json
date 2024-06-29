@@ -1,0 +1,32 @@
+{
+  "name": "employee-tracker",
+  "version": "1.0.0",
+  "description": "A tracker for Employers to track their Employees roles and salary",
+  "main": "Index.js",
+  "scripts": {
+    "test": "npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Edesp1/employee-tracker.git"
+  },
+  "keywords": [
+    "This",
+    "is",
+    "an",
+    "Employee",
+    "tracker"
+  ],
+  "author": "Eduardo E",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Edesp1/employee-tracker/issues"
+  },
+  "homepage": "https://github.com/Edesp1/employee-tracker#readme",
+  "dependencies": {
+    "asciiart-logo": "^0.2.7",
+    "dotenv": "^16.4.5",
+    "inquirer": "^9.3.1",
+    "mysql": "^2.18.1"
+  }
+}
