@@ -2,7 +2,6 @@ DROP DATABASE IF EXISTS employees_DB;
 CREATE DATABASE employees_DB;
 
 USE employees_DB; -- Switch to 'employees_DB'
-SHOW TABLES;
 
 CREATE TABLE departments (
     id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -33,3 +32,4 @@ CREATE TABLE employees (
         ON DELETE SET NULL
         ON UPDATE CASCADE
 );
+SHOW TABLES;

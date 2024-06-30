@@ -28,22 +28,19 @@ function loadPrompts() {
     const startQuestions = [{
         type: "list",
         name: "action",
-        message: "what would you like to do ?",
+        message: "What would you like to do?",
         choices: 
         ["View all employees", 
         "View all roles", 
         "View all departments", 
-        "add an employee", 
-        "add a role", 
-        "add a department", 
-        "update role for an employee", 
-        "update employee's manager", 
-        "view employees by manager", 
-        "delete a department", 
-        "delete a role", 
-        "delete an employee", 
-        "View the total utilized budget of a department", 
-        "quit"]
+        "Add an employee", 
+        "Add a role", 
+        "Add a department", 
+        "Update role for an employee",
+        "Delete a department", 
+        "Delete a role", 
+        "Delete an employee", 
+        "Quit"]
     }];
 
 inquirer.prompt(startQuestions)
@@ -98,7 +95,7 @@ inquirer.prompt(startQuestions)
 
 //view departments
 function viewDepartments() {
-    const sql = `SELECT department.id, department.name AS Department FROM department;`;
+    const sql = `SELECT departments.id, departments.name AS Department FROM departments;`;
     db.query(sql, (err, res) => {
         if (err) {
             console.log(err);
@@ -111,7 +108,7 @@ function viewDepartments() {
 
 //view roles
 function viewRoles() {
-    const sql = `SELECT role.id, role.title AS role, role.salary, department.name AS department FROM role INNER JOIN department ON (department.id = role.department_id);`;
+    const sql = `SELECT roles.id, roles.title AS role, roles.salary, departments.name AS department FROM roles INNER JOIN departments ON (departments.id = roles.departments_id);`;
     db.query(sql, (err, res) => {
         if (err) {
             console.log(err);
@@ -124,7 +121,7 @@ function viewRoles() {
 
 //viewing employees
 function viewEmployees() {
-    const sql = `SELECT employee.id, employee.first_name, employee.last_name, role.title AS role, department.name AS department, role.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employee LEFT JOIN employee manager on manager.id = employee.manager_id INNER JOIN role ON (role.id = employee.role_id) INNER JOIN department ON (department.id = role.department_id) ORDER BY employee.id;`
+    const sql = `SELECT employees.id, employees.first_name, employees.last_name, roles.title AS role, departments.name AS department, roles.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager FROM employees LEFT JOIN employees manager on manager.id = employees.manager_id INNER JOIN roles ON (roles.id = employees.roles_id) INNER JOIN departments ON (departments.id = roles.departments_id) ORDER BY employees.id;`
     db.query(sql, (err, res) => {
         if (err) {
             console.log(err);
@@ -144,7 +141,7 @@ function addDepartment() {
             message: 'What is the name of the department?',
         }
     ]).then((answer) => {
-        const sql = `INSERT INTO department(name) VALUES('${answer.department}');`;
+        const sql = `INSERT INTO departments(name) VALUES('${answer.department}');`;
         db.query(sql, (err, res) => {
             if (err) {
                 console.log(err);
@@ -158,7 +155,7 @@ function addDepartment() {
 
 //adding roles
 function addRole() {
-    const sql2 = `SELECT * FROM department`;
+    const sql2 = `SELECT * FROM departments`;
     db.query(sql2, (error, response) => {
         departmentList = response.map(departments => ({
             name: departments.name,
@@ -178,11 +175,11 @@ function addRole() {
             {
                 type: 'list',
                 name: 'department',
-                message: 'Which Department does the role belong to?',
+                message: 'Which department does the role belong to?',
                 choices: departmentList
             }
         ]).then((answers) => {
-            const sql = `INSERT INTO role SET title='${answers.title}', salary= ${answers.salary}, department_id= ${answers.department};`;
+            const sql = `INSERT INTO roles SET title='${answers.title}', salary= ${answers.salary}, departments_id= ${answers.department};`;
             db.query(sql, (err, res) => {
                 if (err) {
                     console.log(err);
@@ -197,18 +194,18 @@ function addRole() {
 
 //adding employees
 function addEmployee() {
-    const sql2 = `SELECT * FROM employee`;
+    const sql2 = `SELECT * FROM employees`;
     db.query(sql2, (error, response) => {
         employeeList = response.map(employees => ({
             name: employees.first_name.concat(" ", employees.last_name),
             value: employees.id
         }));
 
-    const sql3 = `SELECT * FROM role`;
+    const sql3 = `SELECT * FROM roles`;
     db.query(sql3, (error, response) => {
-       const roleList = response.map(role => ({
-            name: role.title,
-            value: role.id
+       const roleList = response.map(roles => ({
+            name: roles.title,
+            value: roles.id
         }));
         inquirer.prompt([
                 {
@@ -234,7 +231,7 @@ function addEmployee() {
                     choices: employeeList
                 }
             ]).then((answers) => {
-                const sql = `INSERT INTO employee SET first_name='${answers.first}', last_name= '${answers.last}', role_id= ${answers.role}, manager_id=${answers.manager};`
+                const sql = `INSERT INTO employees SET first_name='${answers.first}', last_name= '${answers.last}', roles_id= ${answers.role}, manager_id=${answers.manager};`
                 db.query(sql, (err, res) => {
                     if (err) {
                         console.log(err);
@@ -248,19 +245,90 @@ function addEmployee() {
     });
 };
 
+//deleting employees
+function deleteEmployee() {
+    inquirer.prompt([
+        {
+            type: 'input',
+            name: 'employeeId',
+            message: 'Enter the ID of the employee you want to delete:'
+        }
+    ]).then((answer) => {
+        const sql = `DELETE FROM employees WHERE id = ${answer.employeeId};`;
+        db.query(sql, (err, res) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            console.log(`Employee with ID ${answer.employeeId} deleted successfully`);
+            loadPrompts();
+        });
+    });
+};
+
+//deleting roles
+function deleteRole() {
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "roleId",
+            message: "Enter ID of the role you want to delete:"
+        }
+    ]).then((answer) => {
+        const sql = `DELETE FROM roles WHERE id = ${answer.roleId};`;
+        db.query(sql, (err, res) => {
+            if(err) {
+                console.log(err);
+                return;
+            }
+            if (res.affectedRows > 0) {
+                console.log(`Department with ID ${answer.roleId} deleted successfully`);
+            } else {
+                console.log(`Department with ID ${answer.roleId} not found`);
+            }
+            loadPrompts()
+        });
+    });
+};
+
+//deleting departments
+function deleteDepartment() {
+    inquirer.prompt([
+        {
+            type: "input",
+            name: "departmentId",
+            message: "Enter ID of the department you want to delete:"
+        }
+    ]).then((answer) => {
+        const sql = `DELETE FROM departments WHERE id = ${answer.departmentId};`;
+        db.query(sql, (err, res) => {
+            if (err) {
+                console.log(err);
+                return;
+            }
+            if (res.affectedRows > 0) {
+                console.log(`Department with ID ${answer.departmentId} deleted successfully`);
+            } else {
+                console.log(`Department with ID ${answer.departmentId} not found`);
+            }
+            loadPrompts();
+        });
+    });
+}
+
 //updating roles
 function updateRole() {
-    const sql2 = `SELECT * FROM employee`;
+    const sql2 = `SELECT * FROM employees`;
     db.query(sql2, (error, response) => {
         employeeList = response.map(employees => ({
             name: employees.first_name.concat(" ", employees.last_name),
             value: employees.id
         }));
-        const sql3 = `SELECT * FROM role`;
+        const sql3 = `SELECT * FROM roles`;
         db.query(sql3, (error, response) => {
-            roleList = response.map(role => ({
-                name: role.title,
-                value: role.id
+            roleList = response.map(roles => ({
+                name: roles.title,
+                value: roles.id
             }));
             inquirer.prompt([
                 {
@@ -283,7 +351,7 @@ function updateRole() {
                 },
                 
             ]).then((answers) => {
-                const sql = `UPDATE employee SET role_id= ${answers.role}, manager_id=${answers.manager} WHERE id =${answers.employee};`;
+                const sql = `UPDATE employees SET roles_id= ${answers.role}, manager_id=${answers.manager} WHERE id =${answers.employee};`;
                 db.query(sql, (err, res) => {
                     if (err) {
                         console.log(err);
